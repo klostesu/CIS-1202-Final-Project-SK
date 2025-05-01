@@ -18,6 +18,9 @@
     <ClCompile Include="CIS 1202 Final Project SK.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
@@ -26,7 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="nba_hustle_stats.csv">
-      <Filter>Resource Files</Filter>
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

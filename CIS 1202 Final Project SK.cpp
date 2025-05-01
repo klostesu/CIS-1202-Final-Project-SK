@@ -19,27 +19,17 @@ static vector<Player> readCSV(const::string& filename) {
         int age, gp, minutes;
         double boxOut, screenAssist, deflections, looseBalls, charges, contestedShots;
 
-        getline(ss, name);
-        ss >> team;
-        ss.ignore(); // Skip comma
-        ss >> age;
-        ss.ignore(); // Skip comma
-        ss >> gp;
-        ss.ignore(); // Skip comma
-        ss >> minutes;
-        ss.ignore(); // Skip comma
-        ss >> boxOut;
-        ss.ignore(); // Skip comma
-        ss >> screenAssist;
-        ss.ignore(); // Skip comma
-        ss >> deflections;
-        ss.ignore(); // Skip comma
-        ss >> looseBalls;
-        ss.ignore(); // Skip comma
-        ss >> charges;
-        ss.ignore(); // Skip comma
-        ss >> contestedShots;
-        ss.ignore(); // Skip comma
+        getline(ss, name, ',');  // Properly extracts name up to the comma
+        getline(ss, team, ',');  // Extracts the 3-letter team code correctly
+        ss >> age; ss.ignore();
+        ss >> gp; ss.ignore();
+        ss >> minutes; ss.ignore();
+        ss >> boxOut; ss.ignore();
+        ss >> screenAssist; ss.ignore();
+        ss >> deflections; ss.ignore();
+        ss >> looseBalls; ss.ignore();
+        ss >> charges; ss.ignore();
+        ss >> contestedShots; ss.ignore();
 
         players.emplace_back(name, team, age,gp, minutes, 
             boxOut, screenAssist, deflections, looseBalls, charges, contestedShots);
@@ -48,7 +38,11 @@ static vector<Player> readCSV(const::string& filename) {
     return players;
 }
 
-int main() {
+int main()
+
+{
+    cout << "Hello World" << endl;
+
     string filename = "nba_hustle_stats.csv";
     vector<Player> players = readCSV(filename);
 
