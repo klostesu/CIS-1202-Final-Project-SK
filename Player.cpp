@@ -1,22 +1,26 @@
 #include "Player.h"
+#include "utils.h"
 #include <iostream>
 #include <vector>
-#include <cmath>  
+#include <cmath>
 using namespace std;
 
-// Initialize all member variables in the constructor
-Player::Player(string n, string t, int a, int g, int m,
+// Constructor
+Player::Player(std::string n, std::string t, int a, int g, int m,
     double bo, double sa, double de, double lb, double ch, double cs)
     : name(n), team(t), age(a), gp(g), minutes(m),
     boxOut(bo), screenAssist(sa), deflections(de),
     looseBalls(lb), charges(ch), contestedShots(cs) {
 }
 
-void Player::displayStats() const {
-    cout << "Player Name: " << name << endl;
-    cout << "Team: " << team << endl;
-    cout << "Age: " << age << endl;
-}
+// Getters
+std::string Player::getName() const { return name; }
+double Player::getBoxOut() const { return boxOut; }
+double Player::getScreenAssist() const { return screenAssist; }
+double Player::getDeflections() const { return deflections; }
+double Player::getLooseBalls() const { return looseBalls; }
+double Player::getCharges() const { return charges; }
+double Player::getContestedShots() const { return contestedShots; }
 
 // Compute mean for a given dataset
 double Player::computeMean(const std::vector<double>& data) {
@@ -41,18 +45,34 @@ double Player::computeZScore(double value, double mean, double stdDev) {
     return (value - mean) / stdDev;
 }
 
-double Player::scaleTo100(double value, double minValue, double maxValue) {
-    if (maxValue == minValue) return 50;  // Prevent division by zero
-    return ((value - minValue) / (maxValue - minValue)) * 100;
+// displayStats: prints player info and their hustle index.
+void Player::displayStats(const std::vector<double>& boxOutAll,
+    const std::vector<double>& screenAssistAll,
+    const std::vector<double>& deflectionsAll,
+    const std::vector<double>& looseBallsAll,
+    const std::vector<double>& chargesAll,
+    const std::vector<double>& contestedShotsAll) const {
+
+    // Display basic player stats
+    cout << "Player Name: " << name << endl;
+    cout << "Team: " << team << endl;
+    cout << "Age: " << age << endl;
+
+    // Calculate Hustle Index
+    double hustleIndex = calculateHustleIndex(boxOutAll, screenAssistAll,
+        deflectionsAll, looseBallsAll,
+        chargesAll, contestedShotsAll);
+    cout << "Hustle Index: " << hustleIndex << endl;
 }
 
+// calculateHustleIndex: computes a raw hustle index based on several metrics.
 double Player::calculateHustleIndex(const std::vector<double>& boxOutAll,
     const std::vector<double>& screenAssistAll,
     const std::vector<double>& deflectionsAll,
     const std::vector<double>& looseBallsAll,
     const std::vector<double>& chargesAll,
     const std::vector<double>& contestedShotsAll) const {
-    // Compute mean & standard deviation for each hustle stat
+
     double meanBoxOut = computeMean(boxOutAll);
     double stdDevBoxOut = computeStdDev(boxOutAll, meanBoxOut);
     double meanScreenAssist = computeMean(screenAssistAll);
@@ -66,58 +86,17 @@ double Player::calculateHustleIndex(const std::vector<double>& boxOutAll,
     double meanContestedShots = computeMean(contestedShotsAll);
     double stdDevContestedShots = computeStdDev(contestedShotsAll, meanContestedShots);
 
-    // Compute Z-scores
-    double zBoxOut = computeZScore(boxOut, meanBoxOut, stdDevBoxOut);
-    double zScreenAssist = computeZScore(screenAssist, meanScreenAssist, stdDevScreenAssist);
-    double zDeflections = computeZScore(deflections, meanDeflections, stdDevDeflections);
-    double zLooseBalls = computeZScore(looseBalls, meanLooseBalls, stdDevLooseBalls);
-    double zCharges = computeZScore(charges, meanCharges, stdDevCharges);
-    double zContestedShots = computeZScore(contestedShots, meanContestedShots, stdDevContestedShots);
+    // Calculate Z-scores, applying age-based adjustments using our template function.
+    double zBoxOut = adjustZScoreByAge(computeZScore(boxOut, meanBoxOut, stdDevBoxOut), age, "boxOut");
+    double zScreenAssist = adjustZScoreByAge(computeZScore(screenAssist, meanScreenAssist, stdDevScreenAssist), age, "screenAssist");
+    double zDeflections = adjustZScoreByAge(computeZScore(deflections, meanDeflections, stdDevDeflections), age, "deflections");
+    double zLooseBalls = adjustZScoreByAge(computeZScore(looseBalls, meanLooseBalls, stdDevLooseBalls), age, "looseBalls");
+    double zCharges = adjustZScoreByAge(computeZScore(charges, meanCharges, stdDevCharges), age, "charges");
+    double zContestedShots = adjustZScoreByAge(computeZScore(contestedShots, meanContestedShots, stdDevContestedShots), age, "contestedShots");
 
-    // Aggregate Z-scores into raw score
+    // Aggregate all Z-scores to form the raw hustle index.
     double rawScore = zBoxOut + zScreenAssist + zDeflections + zLooseBalls + zCharges + zContestedShots;
-
-    // Find min & max across ALL players' raw scores
-    static double minScore = std::numeric_limits<double>::max();
-    static double maxScore = std::numeric_limits<double>::lowest();
-
-    minScore = std::min(minScore, rawScore);
-    maxScore = std::max(maxScore, rawScore);
-
-    // Normalize score to 1-100 range
-    return (maxScore == minScore) ? 50 : scaleTo100(rawScore, minScore, maxScore);
+    return rawScore;
 }
 
-
-string Player::getName() const {
-    return name;
-}
-
-double Player::getBoxOut() const { return boxOut; }
-double Player::getScreenAssist() const { return screenAssist; }
-double Player::getDeflections() const { return deflections; }
-double Player::getLooseBalls() const { return looseBalls; }
-double Player::getCharges() const { return charges; }
-double Player::getContestedShots() const { return contestedShots; }
-
-
-void Player::displayStats(const std::vector<double>& boxOutAll,
-    const std::vector<double>& screenAssistAll,
-    const std::vector<double>& deflectionsAll,
-    const std::vector<double>& looseBallsAll,
-    const std::vector<double>& chargesAll,
-    const std::vector<double>& contestedShotsAll) const {
-    cout << "Player Name: " << name << endl;
-    cout << "Team: " << team << endl;
-    cout << "Age: " << age << endl;
-
-
-   // Calculate and display hustle index
-   double hustleIndex = calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
-    cout << "Hustle Index: " << hustleIndex << endl;
-    cout << "Player Name: " << name << endl;
-    cout << "Team: " << team << endl;
-    cout << "Age: " << age << endl;
-
-}
 

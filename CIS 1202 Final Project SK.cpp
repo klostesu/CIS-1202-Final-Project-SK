@@ -1,4 +1,4 @@
-// CIS 1202 Final Project SK.cpp : This file contains the 'main' function. Program execution begins and ends there.
+﻿// CIS 1202 Final Project SK.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #include <iostream>
@@ -6,7 +6,8 @@
 #include <sstream>
 #include <vector>
 #include "Player.h"
-#include <algorithm>  // For std::transform
+#include "utils.h"      
+
 using namespace std;
 
 static vector<Player> readCSV(const string& filename) {
@@ -28,28 +29,27 @@ static vector<Player> readCSV(const string& filename) {
         double boxOut, screenAssist, deflections, looseBalls, charges, contestedShots;
 
         if (!(getline(ss, name, ',') && getline(ss, team, ','))) {
-            cerr << "Warning: Skipped row with missing name or team ? " << line << endl;
+            cerr << "Warning: Skipped row with missing name or team -> " << line << endl;
             continue;
         }
 
-        // Try reading all numeric fields in one go
-        if (!(ss >> age)) { cerr << "Warning: Skipped row (age fail) ? " << line << endl; continue; }
+        if (!(ss >> age)) { cerr << "Warning: Skipped row (age fail) -> " << line << endl; continue; }
         ss.ignore();
-        if (!(ss >> gp)) { cerr << "Warning: Skipped row (gp fail) ? " << line << endl; continue; }
+        if (!(ss >> gp)) { cerr << "Warning: Skipped row (gp fail) -> " << line << endl; continue; }
         ss.ignore();
-        if (!(ss >> minutes)) { cerr << "Warning: Skipped row (minutes fail) ? " << line << endl; continue; }
+        if (!(ss >> minutes)) { cerr << "Warning: Skipped row (minutes fail) -> " << line << endl; continue; }
         ss.ignore();
-        if (!(ss >> boxOut)) { cerr << "Warning: Skipped row (boxOut fail) ? " << line << endl; continue; }
+        if (!(ss >> boxOut)) { cerr << "Warning: Skipped row (boxOut fail) -> " << line << endl; continue; }
         ss.ignore();
-        if (!(ss >> screenAssist)) { cerr << "Warning: Skipped row (screenAssist fail) ? " << line << endl; continue; }
+        if (!(ss >> screenAssist)) { cerr << "Warning: Skipped row (screenAssist fail) -> " << line << endl; continue; }
         ss.ignore();
-        if (!(ss >> deflections)) { cerr << "Warning: Skipped row (deflections fail) ? " << line << endl; continue; }
+        if (!(ss >> deflections)) { cerr << "Warning: Skipped row (deflections fail) -> " << line << endl; continue; }
         ss.ignore();
-        if (!(ss >> looseBalls)) { cerr << "Warning: Skipped row (looseBalls fail) ? " << line << endl; continue; }
+        if (!(ss >> looseBalls)) { cerr << "Warning: Skipped row (looseBalls fail) -> " << line << endl; continue; }
         ss.ignore();
-        if (!(ss >> charges)) { cerr << "Warning: Skipped row (charges fail) ? " << line << endl; continue; }
+        if (!(ss >> charges)) { cerr << "Warning: Skipped row (charges fail) -> " << line << endl; continue; }
         ss.ignore();
-        if (!(ss >> contestedShots)) { cerr << "Warning: Skipped row (contestedShots fail) ? " << line << endl; continue; }
+        if (!(ss >> contestedShots)) { cerr << "Warning: Skipped row (contestedShots fail) -> " << line << endl; continue; }
 
         players.emplace_back(name, team, age, gp, minutes,
             boxOut, screenAssist, deflections, looseBalls,
@@ -59,17 +59,14 @@ static vector<Player> readCSV(const string& filename) {
     return players;
 }
 
-
 int main() {
     cout << "Hello World" << endl;
 
     string filename = "nba_hustle_stats.csv";
     vector<Player> players = readCSV(filename);
 
-    // Declare vectors **before** filling them
+    // Build vectors for each stat needed to compute each player's raw hustle index.
     vector<double> boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll;
-
-    // Populate vectors with player stats
     for (const Player& player : players) {
         boxOutAll.push_back(player.getBoxOut());
         screenAssistAll.push_back(player.getScreenAssist());
@@ -79,22 +76,25 @@ int main() {
         contestedShotsAll.push_back(player.getContestedShots());
     }
 
-    // Debug prints to check vector sizes
-    cout << "Total Players Loaded: " << players.size() << endl;
-    cout << "BoxOut Data Size: " << boxOutAll.size() << endl;
-    cout << "Screen Assist Data Size: " << screenAssistAll.size() << endl;
-    cout << "Deflections Data Size: " << deflectionsAll.size() << endl;
-    cout << "Loose Balls Data Size: " << looseBallsAll.size() << endl;
-    cout << "Charges Data Size: " << chargesAll.size() << endl;
-    cout << "Contested shots Data Size: " << contestedShotsAll.size() << endl;
-
-    // Calculate and display hustle index for each player
+    // Compute raw hustle scores for all players.
+    vector<double> rawScores;
     for (const Player& player : players) {
-        player.displayStats(boxOutAll, screenAssistAll,
-            deflectionsAll, looseBallsAll,
-            chargesAll, contestedShotsAll);
+        double rawScore = player.calculateHustleIndex(
+            boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll
+        );
+        rawScores.push_back(rawScore);
     }
 
-    return 0;  // **Properly closes `main()`**
+    // Normalize the raw scores using our utils function.
+    vector<double> normalizedScores = normalizeScores(rawScores);
+
+    // Print out the raw score and the normalized score for each player.
+    for (size_t i = 0; i < players.size(); i++) {
+        cout << "Player: " << players[i].getName()
+            << " | Raw Hustle Score: " << rawScores[i]
+            << " | Normalized Hustle Score: " << normalizedScores[i] << endl;
+    }
+
+    return 0;
 }
       
