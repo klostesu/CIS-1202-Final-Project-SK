@@ -27,6 +27,7 @@ public:
 
     // Getters
     std::string getName() const;
+    int getAge() const;
     double getBoxOut() const;
     double getScreenAssist() const;
     double getDeflections() const;

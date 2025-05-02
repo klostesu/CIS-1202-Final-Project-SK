@@ -22,6 +22,10 @@ double Player::getLooseBalls() const { return looseBalls; }
 double Player::getCharges() const { return charges; }
 double Player::getContestedShots() const { return contestedShots; }
 
+int Player::getAge() const {
+    return age;
+}
+
 // Compute mean for a given dataset
 double Player::computeMean(const std::vector<double>& data) {
     double sum = 0.0;
