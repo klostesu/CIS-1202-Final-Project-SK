@@ -6,21 +6,31 @@
 #include <sstream>
 #include <vector>
 #include "Player.h"
+#include <algorithm>  // For std::transform
 using namespace std;
 
-static vector<Player> readCSV(const::string& filename) {
+static vector<Player> readCSV(const string& filename) {  // Removed `::` typo
     vector<Player> players;
     ifstream file(filename);
     string line;
 
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file " << filename << endl;
+        return players;
+    }
+
     while (getline(file, line)) {
+        if (line.empty()) continue;  // Skip blank rows
+
         stringstream ss(line);
         string name, team;
         int age, gp, minutes;
         double boxOut, screenAssist, deflections, looseBalls, charges, contestedShots;
 
-        getline(ss, name, ',');  // Properly extracts name up to the comma
-        getline(ss, team, ',');  // Extracts the 3-letter team code correctly
+        if (!(getline(ss, name, ',') && getline(ss, team, ','))) {
+            continue;  // Skip invalid rows
+        }
+
         ss >> age; ss.ignore();
         ss >> gp; ss.ignore();
         ss >> minutes; ss.ignore();
@@ -31,25 +41,49 @@ static vector<Player> readCSV(const::string& filename) {
         ss >> charges; ss.ignore();
         ss >> contestedShots; ss.ignore();
 
-        players.emplace_back(name, team, age,gp, minutes, 
-            boxOut, screenAssist, deflections, looseBalls, charges, contestedShots);
+        players.emplace_back(name, team, age, gp, minutes,
+            boxOut, screenAssist, deflections, looseBalls,
+            charges, contestedShots);
     }
 
     return players;
 }
 
-int main()
-
-{
+int main() {
     cout << "Hello World" << endl;
 
     string filename = "nba_hustle_stats.csv";
     vector<Player> players = readCSV(filename);
 
-    // Now process the players using functions from Player.cpp
-    for (Player& player : players) {
-        player.displayStats();  // Call method from Player.cpp
+    // Declare vectors **before** filling them
+    vector<double> boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll;
+
+    // Populate vectors with player stats
+    for (const Player& player : players) {
+        boxOutAll.push_back(player.getBoxOut());
+        screenAssistAll.push_back(player.getScreenAssist());
+        deflectionsAll.push_back(player.getDeflections());
+        looseBallsAll.push_back(player.getLooseBalls());
+        chargesAll.push_back(player.getCharges());
+        contestedShotsAll.push_back(player.getContestedShots());
     }
 
-    return 0;
+    // Debug prints to check vector sizes
+    cout << "Total Players Loaded: " << players.size() << endl;
+    cout << "BoxOut Data Size: " << boxOutAll.size() << endl;
+    cout << "Screen Assist Data Size: " << screenAssistAll.size() << endl;
+    cout << "Deflections Data Size: " << deflectionsAll.size() << endl;
+    cout << "Loose Balls Data Size: " << looseBallsAll.size() << endl;
+    cout << "Charges Data Size: " << chargesAll.size() << endl;
+    cout << "Contested shots Data Size: " << contestedShotsAll.size() << endl;
+
+    // Calculate and display hustle index for each player
+    for (const Player& player : players) {
+        player.displayStats(boxOutAll, screenAssistAll,
+            deflectionsAll, looseBallsAll,
+            chargesAll, contestedShotsAll);
+    }
+
+    return 0;  // **Properly closes `main()`**
 }
+      
