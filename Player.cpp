@@ -41,8 +41,8 @@ double Player::computeZScore(double value, double mean, double stdDev) {
     return (value - mean) / stdDev;
 }
 
-// Scale index from 1 to 100
 double Player::scaleTo100(double value, double minValue, double maxValue) {
+    if (maxValue == minValue) return 50;  // Prevent division by zero
     return ((value - minValue) / (maxValue - minValue)) * 100;
 }
 
@@ -51,8 +51,7 @@ double Player::calculateHustleIndex(const std::vector<double>& boxOutAll,
     const std::vector<double>& deflectionsAll,
     const std::vector<double>& looseBallsAll,
     const std::vector<double>& chargesAll,
-    const std::vector<double>& contestedShotsAll) const
-{
+    const std::vector<double>& contestedShotsAll) const {
     // Compute mean & standard deviation for each hustle stat
     double meanBoxOut = computeMean(boxOutAll);
     double stdDevBoxOut = computeStdDev(boxOutAll, meanBoxOut);
@@ -75,12 +74,20 @@ double Player::calculateHustleIndex(const std::vector<double>& boxOutAll,
     double zCharges = computeZScore(charges, meanCharges, stdDevCharges);
     double zContestedShots = computeZScore(contestedShots, meanContestedShots, stdDevContestedShots);
 
-    // Aggregate all Z-scores
-    // Compute Z-scores
+    // Aggregate Z-scores into raw score
     double rawScore = zBoxOut + zScreenAssist + zDeflections + zLooseBalls + zCharges + zContestedShots;
 
-    return rawScore;
+    // Find min & max across ALL players' raw scores
+    static double minScore = std::numeric_limits<double>::max();
+    static double maxScore = std::numeric_limits<double>::lowest();
+
+    minScore = std::min(minScore, rawScore);
+    maxScore = std::max(maxScore, rawScore);
+
+    // Normalize score to 1-100 range
+    return (maxScore == minScore) ? 50 : scaleTo100(rawScore, minScore, maxScore);
 }
+
 
 string Player::getName() const {
     return name;
@@ -93,6 +100,7 @@ double Player::getLooseBalls() const { return looseBalls; }
 double Player::getCharges() const { return charges; }
 double Player::getContestedShots() const { return contestedShots; }
 
+
 void Player::displayStats(const std::vector<double>& boxOutAll,
     const std::vector<double>& screenAssistAll,
     const std::vector<double>& deflectionsAll,
@@ -103,12 +111,13 @@ void Player::displayStats(const std::vector<double>& boxOutAll,
     cout << "Team: " << team << endl;
     cout << "Age: " << age << endl;
 
-    // Compute Hustle Index **without normalization** first
-    double hustleIndexRaw = calculateHustleIndex(boxOutAll, screenAssistAll,
-        deflectionsAll, looseBallsAll,
-        chargesAll, contestedShotsAll);
 
-    // Print raw index
-    cout << "Raw Hustle Index (before scaling): " << hustleIndexRaw << endl;
+   // Calculate and display hustle index
+   double hustleIndex = calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+    cout << "Hustle Index: " << hustleIndex << endl;
+    cout << "Player Name: " << name << endl;
+    cout << "Team: " << team << endl;
+    cout << "Age: " << age << endl;
+
 }
 
