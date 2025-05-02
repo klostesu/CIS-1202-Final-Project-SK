@@ -9,7 +9,7 @@
 #include <algorithm>  // For std::transform
 using namespace std;
 
-static vector<Player> readCSV(const string& filename) {  // Removed `::` typo
+static vector<Player> readCSV(const string& filename) {
     vector<Player> players;
     ifstream file(filename);
     string line;
@@ -28,18 +28,28 @@ static vector<Player> readCSV(const string& filename) {  // Removed `::` typo
         double boxOut, screenAssist, deflections, looseBalls, charges, contestedShots;
 
         if (!(getline(ss, name, ',') && getline(ss, team, ','))) {
-            continue;  // Skip invalid rows
+            cerr << "Warning: Skipped row with missing name or team ? " << line << endl;
+            continue;
         }
 
-        ss >> age; ss.ignore();
-        ss >> gp; ss.ignore();
-        ss >> minutes; ss.ignore();
-        ss >> boxOut; ss.ignore();
-        ss >> screenAssist; ss.ignore();
-        ss >> deflections; ss.ignore();
-        ss >> looseBalls; ss.ignore();
-        ss >> charges; ss.ignore();
-        ss >> contestedShots; ss.ignore();
+        // Try reading all numeric fields in one go
+        if (!(ss >> age)) { cerr << "Warning: Skipped row (age fail) ? " << line << endl; continue; }
+        ss.ignore();
+        if (!(ss >> gp)) { cerr << "Warning: Skipped row (gp fail) ? " << line << endl; continue; }
+        ss.ignore();
+        if (!(ss >> minutes)) { cerr << "Warning: Skipped row (minutes fail) ? " << line << endl; continue; }
+        ss.ignore();
+        if (!(ss >> boxOut)) { cerr << "Warning: Skipped row (boxOut fail) ? " << line << endl; continue; }
+        ss.ignore();
+        if (!(ss >> screenAssist)) { cerr << "Warning: Skipped row (screenAssist fail) ? " << line << endl; continue; }
+        ss.ignore();
+        if (!(ss >> deflections)) { cerr << "Warning: Skipped row (deflections fail) ? " << line << endl; continue; }
+        ss.ignore();
+        if (!(ss >> looseBalls)) { cerr << "Warning: Skipped row (looseBalls fail) ? " << line << endl; continue; }
+        ss.ignore();
+        if (!(ss >> charges)) { cerr << "Warning: Skipped row (charges fail) ? " << line << endl; continue; }
+        ss.ignore();
+        if (!(ss >> contestedShots)) { cerr << "Warning: Skipped row (contestedShots fail) ? " << line << endl; continue; }
 
         players.emplace_back(name, team, age, gp, minutes,
             boxOut, screenAssist, deflections, looseBalls,
@@ -48,6 +58,7 @@ static vector<Player> readCSV(const string& filename) {  // Removed `::` typo
 
     return players;
 }
+
 
 int main() {
     cout << "Hello World" << endl;
