@@ -228,15 +228,15 @@ void displayTop10LeaderboardByAgeGroup(const std::vector<Player>& players,
             }
 
             // ✅ Normalize scores within the group
-            std::vector<double> normalizedScores = normalizeScoresByGroup(rawScores);
+            std::vector<double> normalizedScores = normalizeScores(rawScores);
             for (double score : normalizedScores) {
-                cout << "DEBUG: Normalized Score -> " << score << endl;
+                
             }
 
             // ✅ Assign normalized scores back to players
             for (size_t i = 0; i < rankedPlayers.size(); ++i) {
                 rankedPlayers[i].second = normalizedScores[i];
-                cout << "DEBUG: Raw Score -> " << rawScores[i] << " | Normalized Score -> " << normalizedScores[i] << endl;
+                
             }
             
 
@@ -258,46 +258,37 @@ void displayTop10LeaderboardByAgeGroup(const std::vector<Player>& players,
     rankPlayersByAgeGroup(over33, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
 }
 
-void searchPlayerByName(const vector<Player>& players,
-    const vector<double>& boxOutAll,
-    const vector<double>& screenAssistAll,
-    const vector<double>& deflectionsAll,
-    const vector<double>& looseBallsAll,
-    const vector<double>& chargesAll,
-    const vector<double>& contestedShotsAll) {
+void searchPlayerByName(const std::vector<Player>& players,
+    const std::vector<double>& boxOutAll,
+    const std::vector<double>& screenAssistAll,
+    const std::vector<double>& deflectionsAll,
+    const std::vector<double>& looseBallsAll,
+    const std::vector<double>& chargesAll,
+    const std::vector<double>& contestedShotsAll) {
     cout << "Enter the player's name to search: ";
     string searchName;
     cin.ignore();
     getline(cin, searchName);
 
     bool found = false;
+
     for (const Player& player : players) {
         if (player.getName() == searchName) {
-            cout << "\nFound player:\n";
-            cout << "Name: " << player.getName() << "\nTeam: " << player.getTeam() << "\nAge: " << player.getAge() << endl;
+            cout << "\nFound Player:\n";
+            cout << "Name: " << player.getName() << " | Team: " << player.getTeam() << " | Age: " << player.getAge() << endl;
 
-            for (const Player& player : players) {
-                if (player.getName() == searchName) {
-                    cout << "\nFound player:\n";
-                    cout << "Name: " << player.getName() << "\nTeam: " << player.getTeam() << "\nAge: " << player.getAge() << endl;
-
-                    // ✅ Call displayStats() here
-                    player.displayStats(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
-
-                    found = true;
-                    break;
-                }
-            }
+            // ✅ Retrieve the same values used in Options 1 & 2
             double globalScore = player.getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
             double ageAdjustedScore = player.getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
 
-            cout << "**Global Normalized Hustle Index:** " << globalScore << endl;
-            cout << "**Age Group Normalized Hustle Index:** " << ageAdjustedScore << endl;
+            cout << "**Global Normalized Hustle Index (Used in Option 1):** " << globalScore << endl;
+            cout << "**Age Group Normalized Hustle Index (Used in Option 2):** " << ageAdjustedScore << endl;
 
             found = true;
-            break;
+            break;  // ✅ Stop looping after finding the player
         }
     }
+
     if (!found) {
         cout << "Player \"" << searchName << "\" not found." << endl;
     }

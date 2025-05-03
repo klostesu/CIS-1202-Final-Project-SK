@@ -67,7 +67,7 @@ void Player::displayStats(const std::vector<Player>& players,  // ✅ Added `pla
 
     double globalScore = getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
     double ageAdjustedScore = getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
-
+    //double ageAdjustedScore = normalizeScores({ player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll) })[0];
     cout << "**Global Normalized Hustle Index:** " << globalScore << endl;
     cout << "**Age Group Normalized Hustle Index:** " << ageAdjustedScore << endl;
 }
