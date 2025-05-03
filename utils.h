@@ -8,6 +8,20 @@
 #include <limits>
 #include <string>
 
+inline std::vector<double> normalizeScoresByGroup(const std::vector<double>& rawScores) {
+    if (rawScores.empty()) return {};
+
+    double mean = Player::computeMean(rawScores);
+    double stdDev = Player::computeStdDev(rawScores, mean);
+
+    std::vector<double> normalizedScores;
+    for (double score : rawScores) {
+        normalizedScores.push_back(Player::computeZScore(score, mean, stdDev));
+    }
+
+    return normalizedScores;
+}
+
 // Normalize a vector of raw scores to the 1–100 scale.
 inline std::vector<double> normalizeScores(const std::vector<double>& rawScores) {
     std::vector<double> normalized;

@@ -13,7 +13,7 @@
 using namespace std;
 
 // Function prototypes for menu options:
-void displayAllPlayersByAgeGroup(const vector<Player>& players,
+void displayAllPlayersByGlobalNormalization(const vector<Player>& players,
     const vector<double>& boxOutAll,
     const vector<double>& screenAssistAll,
     const vector<double>& deflectionsAll,
@@ -81,7 +81,7 @@ int main() {
         }
         switch (selection) {
         case 1:
-            displayAllPlayersByAgeGroup(players, boxOutAll, screenAssistAll,
+            displayAllPlayersByGlobalNormalization(players, boxOutAll, screenAssistAll,
                 deflectionsAll, looseBallsAll, chargesAll,
                 contestedShotsAll);
             break;
@@ -155,53 +155,26 @@ static vector<Player> readCSV(const string& filename) {
     return players;
 }
 
-// Option 1: Display all players by age group (descending raw score)
-void displayAllPlayersByAgeGroup(const vector<Player>& players,
+void displayAllPlayersByGlobalNormalization(const vector<Player>& players,
     const vector<double>& boxOutAll,
     const vector<double>& screenAssistAll,
     const vector<double>& deflectionsAll,
     const vector<double>& looseBallsAll,
     const vector<double>& chargesAll,
     const vector<double>& contestedShotsAll) {
-    vector<pair<double, const Player*>> groupUnder25;
-    vector<pair<double, const Player*>> group26_32;
-    vector<pair<double, const Player*>> groupOver33;
-
+    vector<double> rawScores;
     for (const Player& player : players) {
-        double rawScore = player.calculateHustleIndex(boxOutAll, screenAssistAll,
-            deflectionsAll, looseBallsAll,
-            chargesAll, contestedShotsAll);
-        if (player.getAge() < 25) {
-            groupUnder25.push_back(make_pair(rawScore, &player));
-        }
-        else if (player.getAge() >= 26 && player.getAge() <= 32) {
-            group26_32.push_back(make_pair(rawScore, &player));
-        }
-        else {
-            groupOver33.push_back(make_pair(rawScore, &player));
-        }
+        rawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
     }
 
-    auto sortDesc = [](const pair<double, const Player*>& a, const pair<double, const Player*>& b) {
-        return a.first > b.first;
-        };
-    sort(groupUnder25.begin(), groupUnder25.end(), sortDesc);
-    sort(group26_32.begin(), group26_32.end(), sortDesc);
-    sort(groupOver33.begin(), groupOver33.end(), sortDesc);
+    vector<double> normalizedScores = normalizeScores(rawScores);
 
-    cout << "\n--- All Players Grouped by Age (Descending by Raw Hustle Index) ---\n";
-    cout << "\nUnder 25:\n";
-    for (const auto& entry : groupUnder25)
-        cout << entry.second->getName() << "  | Raw Hustle: " << entry.first << endl;
-    cout << "\n26-32:\n";
-    for (const auto& entry : group26_32)
-        cout << entry.second->getName() << "  | Raw Hustle: " << entry.first << endl;
-    cout << "\nOver 33:\n";
-    for (const auto& entry : groupOver33)
-        cout << entry.second->getName() << "  | Raw Hustle: " << entry.first << endl;
+    cout << "\n--- Global Normalized Hustle Index Rankings ---\n";
+    for (size_t i = 0; i < players.size(); i++) {
+        cout << players[i].getName() << " | Hustle Index (Global): " << normalizedScores[i] << endl;
+    }
 }
 
-// Option 2: Display top 10 players by normalized hustle index for each age group.
 void displayTop10LeaderboardByAgeGroup(const vector<Player>& players,
     const vector<double>& boxOutAll,
     const vector<double>& screenAssistAll,
@@ -209,66 +182,37 @@ void displayTop10LeaderboardByAgeGroup(const vector<Player>& players,
     const vector<double>& looseBallsAll,
     const vector<double>& chargesAll,
     const vector<double>& contestedShotsAll) {
-    vector<const Player*> groupUnder25, group26_32, groupOver33;
-    vector<double> rawUnder25, raw26_32, rawOver33;
+    // Process and normalize scores **within each age group separately**
+    vector<Player> under25, age26to32, over33;
 
     for (const Player& player : players) {
-        double rawScore = player.calculateHustleIndex(boxOutAll, screenAssistAll,
-            deflectionsAll, looseBallsAll,
-            chargesAll, contestedShotsAll);
-        if (player.getAge() < 25) {
-            groupUnder25.push_back(&player);
-            rawUnder25.push_back(rawScore);
-        }
-        else if (player.getAge() >= 26 && player.getAge() <= 32) {
-            group26_32.push_back(&player);
-            raw26_32.push_back(rawScore);
-        }
-        else {
-            groupOver33.push_back(&player);
-            rawOver33.push_back(rawScore);
-        }
+        if (player.getAge() < 25) under25.push_back(player);
+        else if (player.getAge() >= 26 && player.getAge() <= 32) age26to32.push_back(player);
+        else over33.push_back(player);
     }
 
-    vector<double> normalizedUnder25 = normalizeScores(rawUnder25);
-    vector<double> normalized26_32 = normalizeScores(raw26_32);
-    vector<double> normalizedOver33 = normalizeScores(rawOver33);
+    auto rankPlayersByAgeGroup = [](const vector<Player>& group, const vector<double>& boxOutAll,
+        const vector<double>& screenAssistAll, const vector<double>& deflectionsAll,
+        const vector<double>& looseBallsAll, const vector<double>& chargesAll,
+        const vector<double>& contestedShotsAll) {
+            vector<double> rawScores;
+            for (const Player& player : group) {
+                rawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
+            }
+            vector<double> normalizedScores = normalizeScoresByGroup(rawScores);
 
-    vector<pair<double, const Player*>> leaderboardUnder25, leaderboard26_32, leaderboardOver33;
-    for (size_t i = 0; i < groupUnder25.size(); i++)
-        leaderboardUnder25.push_back(make_pair(normalizedUnder25[i], groupUnder25[i]));
-    for (size_t i = 0; i < group26_32.size(); i++)
-        leaderboard26_32.push_back(make_pair(normalized26_32[i], group26_32[i]));
-    for (size_t i = 0; i < groupOver33.size(); i++)
-        leaderboardOver33.push_back(make_pair(normalizedOver33[i], groupOver33[i]));
-
-    auto sortDesc = [](const pair<double, const Player*>& a, const pair<double, const Player*>& b) {
-        return a.first > b.first;
+            cout << "\n--- Leaderboard for Age Group ---\n";
+            for (size_t i = 0; i < min(group.size(), static_cast<size_t>(10)); i++) {
+                cout << group[i].getName() << " | Hustle Index (Age Adjusted): " << normalizedScores[i] << endl;
+            }
         };
-    sort(leaderboardUnder25.begin(), leaderboardUnder25.end(), sortDesc);
-    sort(leaderboard26_32.begin(), leaderboard26_32.end(), sortDesc);
-    sort(leaderboardOver33.begin(), leaderboardOver33.end(), sortDesc);
 
-    cout << "\n--- Leaderboard (Top 10 by Normalized Hustle Index for Each Age Group) ---\n";
-
-    cout << "\nUnder 25:\n";
-    for (size_t i = 0; i < leaderboardUnder25.size() && i < 10; i++) {
-        cout << i + 1 << ". " << leaderboardUnder25[i].second->getName()
-            << " | Normalized Hustle: " << leaderboardUnder25[i].first << endl;
-    }
-    cout << "\n26-32:\n";
-    for (size_t i = 0; i < leaderboard26_32.size() && i < 10; i++) {
-        cout << i + 1 << ". " << leaderboard26_32[i].second->getName()
-            << " | Normalized Hustle: " << leaderboard26_32[i].first << endl;
-    }
-    cout << "\nOver 33:\n";
-    for (size_t i = 0; i < leaderboardOver33.size() && i < 10; i++) {
-        cout << i + 1 << ". " << leaderboardOver33[i].second->getName()
-            << " | Normalized Hustle: " << leaderboardOver33[i].first << endl;
-    }
+    cout << "\n=== TOP 10 HUSTLE PLAYERS BY AGE GROUP ===";
+    rankPlayersByAgeGroup(under25, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+    rankPlayersByAgeGroup(age26to32, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+    rankPlayersByAgeGroup(over33, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
 }
 
-// Option 3: Search for a player by name and display stats.
 void searchPlayerByName(const vector<Player>& players,
     const vector<double>& boxOutAll,
     const vector<double>& screenAssistAll,
@@ -285,7 +229,14 @@ void searchPlayerByName(const vector<Player>& players,
     for (const Player& player : players) {
         if (player.getName() == searchName) {
             cout << "\nFound player:\n";
-            player.displayStats(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+            cout << "Name: " << player.getName() << "\nTeam: " << player.getTeam() << "\nAge: " << player.getAge() << endl;
+
+            double globalScore = player.getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+            double ageAdjustedScore = player.getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+
+            cout << "**Global Normalized Hustle Index:** " << globalScore << endl;
+            cout << "**Age Group Normalized Hustle Index:** " << ageAdjustedScore << endl;
+
             found = true;
             break;
         }

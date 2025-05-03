@@ -1,4 +1,4 @@
-#include "Player.h"
+﻿#include "Player.h"
 #include "utils.h"
 #include <iostream>
 #include <vector>
@@ -15,6 +15,8 @@ Player::Player(std::string n, std::string t, int a, int g, int m,
 
 // Getters
 std::string Player::getName() const { return name; }
+std::string Player::getTeam() const {
+    return team;}
 double Player::getBoxOut() const { return boxOut; }
 double Player::getScreenAssist() const { return screenAssist; }
 double Player::getDeflections() const { return deflections; }
@@ -49,24 +51,24 @@ double Player::computeZScore(double value, double mean, double stdDev) {
     return (value - mean) / stdDev;
 }
 
-// displayStats: prints player info and their hustle index.
+
 void Player::displayStats(const std::vector<double>& boxOutAll,
     const std::vector<double>& screenAssistAll,
     const std::vector<double>& deflectionsAll,
     const std::vector<double>& looseBallsAll,
     const std::vector<double>& chargesAll,
     const std::vector<double>& contestedShotsAll) const {
+    cout << "\nPlayer Profile\n";
+    cout << "Name: " << name << "\nTeam: " << team << "\nAge: " << age << endl;
 
-    // Display basic player stats
-    cout << "Player Name: " << name << endl;
-    cout << "Team: " << team << endl;
-    cout << "Age: " << age << endl;
+    double hustleIndex = calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+    cout << "Hustle Index (Raw): " << hustleIndex << endl;
 
-    // Calculate Hustle Index
-    double hustleIndex = calculateHustleIndex(boxOutAll, screenAssistAll,
-        deflectionsAll, looseBallsAll,
-        chargesAll, contestedShotsAll);
-    cout << "Hustle Index: " << hustleIndex << endl;
+    double globalScore = getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+    double ageAdjustedScore = getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+
+    cout << "**Global Normalized Hustle Index:** " << globalScore << endl;
+    cout << "**Age Group Normalized Hustle Index:** " << ageAdjustedScore << endl;
 }
 
 // calculateHustleIndex: computes a raw hustle index based on several metrics.
@@ -103,4 +105,46 @@ double Player::calculateHustleIndex(const std::vector<double>& boxOutAll,
     return rawScore;
 }
 
+double Player::getGlobalNormalizedScore(const std::vector<Player>& players,
+    const std::vector<double>& boxOutAll,
+    const std::vector<double>& screenAssistAll,
+    const std::vector<double>& deflectionsAll,
+    const std::vector<double>& looseBallsAll,
+    const std::vector<double>& chargesAll,
+    const std::vector<double>& contestedShotsAll) const {
+    std::vector<double> allRawScores;
+    for (const Player& player : players) { // ✅ Correctly using the passed vector
+        allRawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
+    }
+    std::vector<double> normalizedScores = normalizeScores(allRawScores);
 
+    double rawScore = calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+    auto it = std::find(allRawScores.begin(), allRawScores.end(), rawScore);
+    size_t index = std::distance(allRawScores.begin(), it);
+
+    return normalizedScores[index];
+}
+
+double Player::getAgeAdjustedNormalizedScore(const std::vector<Player>& players,
+    const std::vector<double>& boxOutAll,
+    const std::vector<double>& screenAssistAll,
+    const std::vector<double>& deflectionsAll,
+    const std::vector<double>& looseBallsAll,
+    const std::vector<double>& chargesAll,
+    const std::vector<double>& contestedShotsAll) const {
+    std::vector<double> rawScores;
+    for (const Player& player : players) {
+        if ((age < 25 && player.getAge() < 25) ||
+            (age >= 26 && age <= 32 && player.getAge() >= 26 && player.getAge() <= 32) ||
+            (age > 33 && player.getAge() > 33)) {
+            rawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
+        }
+    }
+    std::vector<double> normalizedScores = normalizeScoresByGroup(rawScores);
+
+    double rawScore = calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+    auto it = std::find(rawScores.begin(), rawScores.end(), rawScore);
+    size_t index = std::distance(rawScores.begin(), it);
+
+    return normalizedScores[index];
+}
