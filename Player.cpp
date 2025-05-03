@@ -52,7 +52,8 @@ double Player::computeZScore(double value, double mean, double stdDev) {
 }
 
 
-void Player::displayStats(const std::vector<double>& boxOutAll,
+void Player::displayStats(const std::vector<Player>& players,  // ✅ Added `players` argument
+    const std::vector<double>& boxOutAll,
     const std::vector<double>& screenAssistAll,
     const std::vector<double>& deflectionsAll,
     const std::vector<double>& looseBallsAll,
@@ -113,9 +114,12 @@ double Player::getGlobalNormalizedScore(const std::vector<Player>& players,
     const std::vector<double>& chargesAll,
     const std::vector<double>& contestedShotsAll) const {
     std::vector<double> allRawScores;
-    for (const Player& player : players) { // ✅ Correctly using the passed vector
+
+    // ✅ Ensure 'players' is used correctly inside the loop
+    for (const Player& player : players) {
         allRawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
     }
+
     std::vector<double> normalizedScores = normalizeScores(allRawScores);
 
     double rawScore = calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);

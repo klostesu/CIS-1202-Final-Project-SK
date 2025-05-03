@@ -53,6 +53,7 @@ int main() {
         return 1;
     }
 
+
     // Build stat vectors for hustle index calculations.
     vector<double> boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll;
     for (const Player& player : players) {
@@ -91,9 +92,8 @@ int main() {
                 contestedShotsAll);
             break;
         case 3:
-            searchPlayerByName(players, boxOutAll, screenAssistAll,
-                deflectionsAll, looseBallsAll, chargesAll,
-                contestedShotsAll);
+            searchPlayerByName(players, boxOutAll, screenAssistAll, 
+                deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
             break;
         case 4:
             cout << "Exiting program. Goodbye!" << endl;
@@ -231,6 +231,18 @@ void searchPlayerByName(const vector<Player>& players,
             cout << "\nFound player:\n";
             cout << "Name: " << player.getName() << "\nTeam: " << player.getTeam() << "\nAge: " << player.getAge() << endl;
 
+            for (const Player& player : players) {
+                if (player.getName() == searchName) {
+                    cout << "\nFound player:\n";
+                    cout << "Name: " << player.getName() << "\nTeam: " << player.getTeam() << "\nAge: " << player.getAge() << endl;
+
+                    // ✅ Call displayStats() here
+                    player.displayStats(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+
+                    found = true;
+                    break;
+                }
+            }
             double globalScore = player.getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
             double ageAdjustedScore = player.getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
 
