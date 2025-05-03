@@ -155,35 +155,53 @@ static vector<Player> readCSV(const string& filename) {
     return players;
 }
 
-void displayAllPlayersByGlobalNormalization(const vector<Player>& players,
-    const vector<double>& boxOutAll,
-    const vector<double>& screenAssistAll,
-    const vector<double>& deflectionsAll,
-    const vector<double>& looseBallsAll,
-    const vector<double>& chargesAll,
-    const vector<double>& contestedShotsAll) {
-    vector<double> rawScores;
+void displayAllPlayersByGlobalNormalization(const std::vector<Player>& players,
+    const std::vector<double>& boxOutAll,
+    const std::vector<double>& screenAssistAll,
+    const std::vector<double>& deflectionsAll,
+    const std::vector<double>& looseBallsAll,
+    const std::vector<double>& chargesAll,
+    const std::vector<double>& contestedShotsAll) {
+    std::vector<std::pair<Player, double>> rankedPlayers;  // Store player + normalized score
+
     for (const Player& player : players) {
-        rawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
+        double hustleIndex = player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+        rankedPlayers.emplace_back(player, hustleIndex);
     }
 
-    vector<double> normalizedScores = normalizeScores(rawScores);
+    // Normalize the scores
+    std::vector<double> rawScores;
+    for (const auto& pair : rankedPlayers) {
+        rawScores.push_back(pair.second);
+    }
+    std::vector<double> normalizedScores = normalizeScores(rawScores);
 
-    cout << "\n--- Global Normalized Hustle Index Rankings ---\n";
-    for (size_t i = 0; i < players.size(); i++) {
-        cout << players[i].getName() << " | Hustle Index (Global): " << normalizedScores[i] << endl;
+    // Assign normalized scores back to players
+    for (size_t i = 0; i < rankedPlayers.size(); ++i) {
+        rankedPlayers[i].second = normalizedScores[i];
+    }
+
+    // Sort players by normalized score (Descending order)
+    std::sort(rankedPlayers.begin(), rankedPlayers.end(), [](const auto& a, const auto& b) {
+        return a.second > b.second;  // Highest scores first
+        });
+
+    // Display sorted results
+    cout << "\n--- Global Normalized Hustle Index Rankings (Descending) ---\n";
+    for (const auto& pair : rankedPlayers) {
+        cout << pair.first.getName() << " | Hustle Index (Global): " << pair.second << endl;
     }
 }
 
-void displayTop10LeaderboardByAgeGroup(const vector<Player>& players,
-    const vector<double>& boxOutAll,
-    const vector<double>& screenAssistAll,
-    const vector<double>& deflectionsAll,
-    const vector<double>& looseBallsAll,
-    const vector<double>& chargesAll,
-    const vector<double>& contestedShotsAll) {
-    // Process and normalize scores **within each age group separately**
-    vector<Player> under25, age26to32, over33;
+void displayTop10LeaderboardByAgeGroup(const std::vector<Player>& players,
+    const std::vector<double>& boxOutAll,
+    const std::vector<double>& screenAssistAll,
+    const std::vector<double>& deflectionsAll,
+    const std::vector<double>& looseBallsAll,
+    const std::vector<double>& chargesAll,
+    const std::vector<double>& contestedShotsAll) {
+    // Separate players into age groups
+    std::vector<Player> under25, age26to32, over33;
 
     for (const Player& player : players) {
         if (player.getAge() < 25) under25.push_back(player);
@@ -191,19 +209,46 @@ void displayTop10LeaderboardByAgeGroup(const vector<Player>& players,
         else over33.push_back(player);
     }
 
-    auto rankPlayersByAgeGroup = [](const vector<Player>& group, const vector<double>& boxOutAll,
-        const vector<double>& screenAssistAll, const vector<double>& deflectionsAll,
-        const vector<double>& looseBallsAll, const vector<double>& chargesAll,
-        const vector<double>& contestedShotsAll) {
-            vector<double> rawScores;
-            for (const Player& player : group) {
-                rawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
-            }
-            vector<double> normalizedScores = normalizeScoresByGroup(rawScores);
+    // Function to compute normalized hustle scores within each age group
+    auto rankPlayersByAgeGroup = [](const std::vector<Player>& group,
+        const std::vector<double>& boxOutAll,
+        const std::vector<double>& screenAssistAll,
+        const std::vector<double>& deflectionsAll,
+        const std::vector<double>& looseBallsAll,
+        const std::vector<double>& chargesAll,
+        const std::vector<double>& contestedShotsAll) {
+            std::vector<std::pair<Player, double>> rankedPlayers;
+            std::vector<double> rawScores;
 
+            // ✅ Compute raw hustle index for each player in the group
+            for (const Player& player : group) {
+                double hustleIndex = player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+                rankedPlayers.emplace_back(player, hustleIndex);
+                rawScores.push_back(hustleIndex);
+            }
+
+            // ✅ Normalize scores within the group
+            std::vector<double> normalizedScores = normalizeScoresByGroup(rawScores);
+            for (double score : normalizedScores) {
+                cout << "DEBUG: Normalized Score -> " << score << endl;
+            }
+
+            // ✅ Assign normalized scores back to players
+            for (size_t i = 0; i < rankedPlayers.size(); ++i) {
+                rankedPlayers[i].second = normalizedScores[i];
+                cout << "DEBUG: Raw Score -> " << rawScores[i] << " | Normalized Score -> " << normalizedScores[i] << endl;
+            }
+            
+
+            // ✅ Sort by normalized hustle index (Descending)
+            std::sort(rankedPlayers.begin(), rankedPlayers.end(), [](const auto& a, const auto& b) {
+                return a.second > b.second;
+                });
+
+            // ✅ Display leaderboard (Top 10 players in the group)
             cout << "\n--- Leaderboard for Age Group ---\n";
-            for (size_t i = 0; i < min(group.size(), static_cast<size_t>(10)); i++) {
-                cout << group[i].getName() << " | Hustle Index (Age Adjusted): " << normalizedScores[i] << endl;
+            for (size_t i = 0; i < std::min(rankedPlayers.size(), static_cast<size_t>(10)); ++i) {
+                cout << rankedPlayers[i].first.getName() << " | Hustle Index (Age Adjusted): " << rankedPlayers[i].second << endl;
             }
         };
 
