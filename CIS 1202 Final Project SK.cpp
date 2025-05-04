@@ -294,8 +294,8 @@ void searchPlayerByName(const std::vector<Player>& players,
             double globalScore = player.getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
             double ageAdjustedScore = player.getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
 
-            std::cout << "**Global Normalized Hustle Index (Used in Option 1):** " << globalScore << endl;
-            std::cout << "**Age Group Normalized Hustle Index (Used in Option 2):** " << ageAdjustedScore << endl;
+            std::cout << "Global Normalized Hustle Index (Used in Option 1):   " << globalScore << endl;
+            std::cout << "Age Group Normalized Hustle Index (Used in Option 2): " << ageAdjustedScore << endl;
 
             found = true;
             break;  // ✅ Stop looping after finding the player
