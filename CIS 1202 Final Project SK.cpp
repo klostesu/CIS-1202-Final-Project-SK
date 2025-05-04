@@ -1,5 +1,5 @@
 ﻿// CIS 1202 Final Project SK.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// Sue Klosterman 2025
 
 #include <iostream>
 #include <iomanip>
@@ -42,7 +42,7 @@ void searchPlayerByName(const vector<Player>& players,
 static vector<Player> readCSV(const string& filename);
 
 //-------------------------------------------
-// main() function
+// main() function                           |
 //-------------------------------------------
 int main() {
     std::cout << "Welcome to the 2023 - 2024 Regular Season NBA Hustle Stats Menu!" << endl;
@@ -96,14 +96,13 @@ int main() {
             searchPlayerByName(players, boxOutAll, screenAssistAll, 
                 deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
             break;
-        case 4:
-            std::cout << "Exiting program. Goodbye!" << endl;
-            break;
+
         }
     } while (selection != 4);
-
+    std::cout << "Exiting program. Goodbye!" << endl;  // ✅ Prints just before exiting
     return 0;
 }
+
 
 //-------------------------------------------
 // Function definitions below main()
@@ -233,9 +232,7 @@ void displayTop10LeaderboardByAgeGroup(const std::vector<Player>& players,
 
             // ✅ Normalize scores within the group
             std::vector<double> normalizedScores = normalizeScores(rawScores);
-            for (double score : normalizedScores) {
-
-            }
+            
 
             // ✅ Assign normalized scores back to players
             for (size_t i = 0; i < rankedPlayers.size(); ++i) {

@@ -15,8 +15,7 @@ Player::Player(std::string n, std::string t, int a, int g, int m,
 
 // Getters
 std::string Player::getName() const { return name; }
-std::string Player::getTeam() const {
-    return team;}
+std::string Player::getTeam() const {return team;}
 double Player::getBoxOut() const { return boxOut; }
 double Player::getScreenAssist() const { return screenAssist; }
 double Player::getDeflections() const { return deflections; }
@@ -51,26 +50,6 @@ double Player::computeZScore(double value, double mean, double stdDev) {
     return (value - mean) / stdDev;
 }
 
-
-void Player::displayStats(const std::vector<Player>& players,  // ✅ Added `players` argument
-    const std::vector<double>& boxOutAll,
-    const std::vector<double>& screenAssistAll,
-    const std::vector<double>& deflectionsAll,
-    const std::vector<double>& looseBallsAll,
-    const std::vector<double>& chargesAll,
-    const std::vector<double>& contestedShotsAll) const {
-    cout << "\nPlayer Profile\n";
-    cout << "Name: " << name << "\nTeam: " << team << "\nAge: " << age << endl;
-
-    double hustleIndex = calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
-    cout << "Hustle Index (Raw): " << hustleIndex << endl;
-
-    double globalScore = getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
-    double ageAdjustedScore = getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
-    //double ageAdjustedScore = normalizeScores({ player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll) })[0];
-    cout << "**Global Normalized Hustle Index:** " << globalScore << endl;
-    cout << "**Age Group Normalized Hustle Index:** " << ageAdjustedScore << endl;
-}
 
 // calculateHustleIndex: computes a raw hustle index based on several metrics.
 double Player::calculateHustleIndex(const std::vector<double>& boxOutAll,
