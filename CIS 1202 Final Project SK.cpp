@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -68,8 +69,8 @@ int main() {
     int selection = 0;
     do {
         cout << "\n=== Main Menu ===\n";
-        cout << "1. Display All Players by Age Group (Descending by Raw Hustle Index)\n";
-        cout << "2. Leaderboards (Top 10 by Normalized Hustle Index for Each Age Group)\n";
+        cout << "1. Hustle Index by Player Normalized across the League\n";
+        cout << "2. Leaderboards (Top 10) by Normalized by Age Group\n";
         cout << "3. Search for a Player by Name\n";
         cout << "4. Exit\n";
         cout << "Enter your selection: ";
@@ -187,9 +188,13 @@ void displayAllPlayersByGlobalNormalization(const std::vector<Player>& players,
         });
 
     // Display sorted results
-    cout << "\n--- Global Normalized Hustle Index Rankings (Descending) ---\n";
+    cout << "\n---  Hustle Index Rankings (Normalized across the League) ---\n";
+    cout << std::left << std::setw(30) << "Player Name" << "League Hustle Index" << std::endl;
+    cout << std::left << std::setw(30) << "-----------" << "-------------------" << std::endl;
     for (const auto& pair : rankedPlayers) {
-        cout << pair.first.getName() << " | Hustle Index (Global): " << pair.second << endl;
+        std::cout << std::fixed << std::setprecision(2);
+        
+        std::cout << std::left << std::setw(30) << pair.first.getName() << pair.second << endl;
     }
 }
 
