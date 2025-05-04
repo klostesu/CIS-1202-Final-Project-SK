@@ -45,12 +45,12 @@ static vector<Player> readCSV(const string& filename);
 // main() function
 //-------------------------------------------
 int main() {
-    cout << "Welcome to the NBA Hustle Stats Menu!" << endl;
+    std::cout << "Welcome to the 2023 - 2024 Regular Season NBA Hustle Stats Menu!" << endl;
 
     string filename = "nba_hustle_stats.csv";
     vector<Player> players = readCSV(filename);
     if (players.empty()) {
-        cout << "No player data available. Exiting." << endl;
+        std::cout << "No player data available. Exiting." << endl;
         return 1;
     }
 
@@ -68,17 +68,17 @@ int main() {
 
     int selection = 0;
     do {
-        cout << "\n=== Main Menu ===\n";
-        cout << "1. Hustle Index by Player Normalized across the League\n";
-        cout << "2. Leaderboards (Top 10) by Normalized by Age Group\n";
-        cout << "3. Search for a Player by Name\n";
-        cout << "4. Exit\n";
-        cout << "Enter your selection: ";
+        std::cout << "\n=== Main Menu ===\n";
+        std::cout << "1. Hustle Index by Player Normalized across the League\n";
+        std::cout << "2. Leaderboards (Top 10) by Normalized by Age Group\n";
+        std::cout << "3. Search for a Player by Name\n";
+        std::cout << "4. Exit\n";
+        std::cout << "Enter your selection: ";
         cin >> selection;
         if (cin.fail() || selection < 1 || selection > 4) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please try again." << endl;
+            std::cout << "Invalid input. Please try again." << endl;
             continue;
         }
         switch (selection) {
@@ -97,7 +97,7 @@ int main() {
                 deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
             break;
         case 4:
-            cout << "Exiting program. Goodbye!" << endl;
+            std::cout << "Exiting program. Goodbye!" << endl;
             break;
         }
     } while (selection != 4);
@@ -188,12 +188,11 @@ void displayAllPlayersByGlobalNormalization(const std::vector<Player>& players,
         });
 
     // Display sorted results
-    cout << "\n---  Hustle Index Rankings (Normalized across the League) ---\n";
-    cout << std::left << std::setw(30) << "Player Name" << "League Hustle Index" << std::endl;
-    cout << std::left << std::setw(30) << "-----------" << "-------------------" << std::endl;
+    std::cout << "\n---  Hustle Index Rankings (Normalized across the League) ---\n";
+    std::cout << std::left << std::setw(30) << "Player Name" << "League Hustle Index" << std::endl;
+    std::cout << std::left << std::setw(30) << "-----------" << "-------------------" << std::endl;
     for (const auto& pair : rankedPlayers) {
         std::cout << std::fixed << std::setprecision(2);
-        
         std::cout << std::left << std::setw(30) << pair.first.getName() << pair.second << endl;
     }
 }
@@ -235,15 +234,15 @@ void displayTop10LeaderboardByAgeGroup(const std::vector<Player>& players,
             // ✅ Normalize scores within the group
             std::vector<double> normalizedScores = normalizeScores(rawScores);
             for (double score : normalizedScores) {
-                
+
             }
 
             // ✅ Assign normalized scores back to players
             for (size_t i = 0; i < rankedPlayers.size(); ++i) {
                 rankedPlayers[i].second = normalizedScores[i];
-                
+
             }
-            
+
 
             // ✅ Sort by normalized hustle index (Descending)
             std::sort(rankedPlayers.begin(), rankedPlayers.end(), [](const auto& a, const auto& b) {
@@ -251,15 +250,24 @@ void displayTop10LeaderboardByAgeGroup(const std::vector<Player>& players,
                 });
 
             // ✅ Display leaderboard (Top 10 players in the group)
-            cout << "\n--- Leaderboard for Age Group ---\n";
+
+            std::cout << std::left << std::setw(30) << "Player Name" << "Age Group Hustle Index" << std::endl;
+            std::cout << std::left << std::setw(30) << "-----------" << "----------------------" << std::endl;
+
             for (size_t i = 0; i < std::min(rankedPlayers.size(), static_cast<size_t>(10)); ++i) {
-                cout << rankedPlayers[i].first.getName() << " | Hustle Index (Age Adjusted): " << rankedPlayers[i].second << endl;
+                std::cout << std::left << std::setw(30) << rankedPlayers[i].first.getName()
+                    << std::fixed << std::setprecision(2) << rankedPlayers[i].second << endl;
             }
         };
 
-    cout << "\n=== TOP 10 HUSTLE PLAYERS BY AGE GROUP ===";
+    std::cout << "\n=== TOP 10 HUSTLE PLAYERS BY AGE GROUP ===\n";
+    std::cout << "\n--- Leaderboard for Players Under 25 ---\n";
     rankPlayersByAgeGroup(under25, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+
+    std::cout << "\n--- Leaderboard for Players 26 to 32 ---\n";
     rankPlayersByAgeGroup(age26to32, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+
+    std::cout << "\n--- Leaderboard for Players Over 33 ---\n";
     rankPlayersByAgeGroup(over33, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
 }
 
@@ -270,7 +278,7 @@ void searchPlayerByName(const std::vector<Player>& players,
     const std::vector<double>& looseBallsAll,
     const std::vector<double>& chargesAll,
     const std::vector<double>& contestedShotsAll) {
-    cout << "Enter the player's name to search: ";
+    std::cout << "Enter the player's name to search: ";
     string searchName;
     cin.ignore();
     getline(cin, searchName);
@@ -279,15 +287,15 @@ void searchPlayerByName(const std::vector<Player>& players,
 
     for (const Player& player : players) {
         if (player.getName() == searchName) {
-            cout << "\nFound Player:\n";
-            cout << "Name: " << player.getName() << " | Team: " << player.getTeam() << " | Age: " << player.getAge() << endl;
+            std::cout << "\nFound Player:\n";
+            std::cout << "Name: " << player.getName() << " | Team: " << player.getTeam() << " | Age: " << player.getAge() << endl;
 
             // ✅ Retrieve the same values used in Options 1 & 2
             double globalScore = player.getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
             double ageAdjustedScore = player.getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
 
-            cout << "**Global Normalized Hustle Index (Used in Option 1):** " << globalScore << endl;
-            cout << "**Age Group Normalized Hustle Index (Used in Option 2):** " << ageAdjustedScore << endl;
+            std::cout << "**Global Normalized Hustle Index (Used in Option 1):** " << globalScore << endl;
+            std::cout << "**Age Group Normalized Hustle Index (Used in Option 2):** " << ageAdjustedScore << endl;
 
             found = true;
             break;  // ✅ Stop looping after finding the player
@@ -295,6 +303,6 @@ void searchPlayerByName(const std::vector<Player>& players,
     }
 
     if (!found) {
-        cout << "Player \"" << searchName << "\" not found." << endl;
+        std::cout << "Player \"" << searchName << "\" not found." << endl;
     }
 }
