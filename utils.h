@@ -32,7 +32,7 @@ inline std::vector<double> normalizeScores(const std::vector<double>& rawScores)
 template <typename T>
 inline T adjustZScoreByAge(T zScore, int age, const std::string& metric) {
     // For players under 25: multiply looseBalls and contestedShots by 2.
-    if (age < 25 && (metric == "looseBalls" || metric == "contestedShots")) {
+    if (age <= 25 && (metric == "looseBalls" || metric == "contestedShots")) {
         return zScore * 2;
     }
     // For players 26 to 32: multiply deflections and charges by 2.
@@ -40,7 +40,7 @@ inline T adjustZScoreByAge(T zScore, int age, const std::string& metric) {
         return zScore * 2;
     }
     // For players over 33: multiply boxOut and screenAssist by 2.
-    else if (age > 33 && (metric == "boxOut" || metric == "screenAssist")) {
+    else if (age >= 33 && (metric == "boxOut" || metric == "screenAssist")) {
         return zScore * 2;
     }
     return zScore;

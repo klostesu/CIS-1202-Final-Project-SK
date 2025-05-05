@@ -227,7 +227,7 @@ void displayTop10LeaderboardByAgeGroup(const std::vector<Player>& players,
     std::vector<Player> under25, age26to32, over33;
 
     for (const Player& player : players) {
-        if (player.getAge() < 25) under25.push_back(player);
+        if (player.getAge() <= 25) under25.push_back(player);
         else if (player.getAge() >= 26 && player.getAge() <= 32) age26to32.push_back(player);
         else over33.push_back(player);
     }
@@ -278,7 +278,7 @@ void displayTop10LeaderboardByAgeGroup(const std::vector<Player>& players,
         };
 
     std::cout << "\n=== TOP 10 DEFENSIVE HUSTLE PLAYERS BY AGE GROUP ===\n";
-    std::cout << "\n--- Leaderboard for Players Under 25 ---\n";
+    std::cout << "\n--- Leaderboard for Players Under 26 ---\n";
     rankPlayersByAgeGroup(under25, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
 
     std::cout << "\n--- Leaderboard for Players 26 to 32 ---\n";
@@ -311,6 +311,7 @@ void searchPlayerByName(const std::vector<Player>& players,
             // Retrieve the same values used in Options 1 & 2
             double globalScore = player.getGlobalNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
             double ageAdjustedScore = player.getAgeAdjustedNormalizedScore(players, boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
+
 
             std::cout << "Global Normalized Defensive Hustle Index (Used in Option 1):   " << globalScore << endl;
             std::cout << "Age Group Normalized Defensive Hustle Index (Used in Option 2): " << ageAdjustedScore << endl;

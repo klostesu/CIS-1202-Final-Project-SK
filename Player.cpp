@@ -125,9 +125,9 @@ double Player::getAgeAdjustedNormalizedScore(const std::vector<Player>& players,
 
     //Only collect raw hustle index values for players in the same age group
     for (const Player& player : players) {
-        if ((age < 25 && player.getAge() < 25) ||
+        if ((age <= 25 && player.getAge() <= 25) ||
             (age >= 26 && age <= 32 && player.getAge() >= 26 && player.getAge() <= 32) ||
-            (age > 33 && player.getAge() > 33)) {
+            (age >= 33 && player.getAge() >= 33)) {
             ageGroupRawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
         }
     }
