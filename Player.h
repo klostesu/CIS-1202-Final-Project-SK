@@ -42,15 +42,7 @@ public:
     static double computeStdDev(const std::vector<double>& data, double mean);
     static double computeZScore(double value, double mean, double stdDev);
 
-
-    void displayStats(const std::vector<Player>& players,  
-        const std::vector<double>& boxOutAll,
-        const std::vector<double>& screenAssistAll,
-        const std::vector<double>& deflectionsAll,
-        const std::vector<double>& looseBallsAll,
-        const std::vector<double>& chargesAll,
-        const std::vector<double>& contestedShotsAll) const;
-
+    // Function for Normalization for all players (opt 1)
     double getGlobalNormalizedScore(const std::vector<Player>& players,
         const std::vector<double>& boxOutAll,
         const std::vector<double>& screenAssistAll,
@@ -59,6 +51,7 @@ public:
         const std::vector<double>& chargesAll,
         const std::vector<double>& contestedShotsAll) const;
 
+    // Function for Normalization in age groups (opt 2)
     double getAgeAdjustedNormalizedScore(const std::vector<Player>& players,  
         const std::vector<double>& boxOutAll,
         const std::vector<double>& screenAssistAll,

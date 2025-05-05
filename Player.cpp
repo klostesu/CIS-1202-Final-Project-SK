@@ -27,6 +27,8 @@ int Player::getAge() const {
     return age;
 }
 
+// Basic Math calculation definitions of functions 
+
 // Compute mean for a given dataset
 double Player::computeMean(const std::vector<double>& data) {
     double sum = 0.0;
@@ -51,7 +53,9 @@ double Player::computeZScore(double value, double mean, double stdDev) {
 }
 
 
-// calculateHustleIndex: computes a raw hustle index based on several metrics.
+// calculateHustleIndex: computes a raw hustle index using the basic math functions
+// applied to all 6 metrics
+
 double Player::calculateHustleIndex(const std::vector<double>& boxOutAll,
     const std::vector<double>& screenAssistAll,
     const std::vector<double>& deflectionsAll,
@@ -85,6 +89,7 @@ double Player::calculateHustleIndex(const std::vector<double>& boxOutAll,
     return rawScore;
 }
 
+// Normalize scores across all players
 double Player::getGlobalNormalizedScore(const std::vector<Player>& players,
     const std::vector<double>& boxOutAll,
     const std::vector<double>& screenAssistAll,
@@ -94,7 +99,7 @@ double Player::getGlobalNormalizedScore(const std::vector<Player>& players,
     const std::vector<double>& contestedShotsAll) const {
     std::vector<double> allRawScores;
 
-    // ✅ Ensure 'players' is used correctly inside the loop
+ 
     for (const Player& player : players) {
         allRawScores.push_back(player.calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll));
     }
@@ -108,6 +113,7 @@ double Player::getGlobalNormalizedScore(const std::vector<Player>& players,
     return normalizedScores[index];
 }
 
+// Normalize scores across age groups 
 double Player::getAgeAdjustedNormalizedScore(const std::vector<Player>& players,
     const std::vector<double>& boxOutAll,
     const std::vector<double>& screenAssistAll,
@@ -117,7 +123,7 @@ double Player::getAgeAdjustedNormalizedScore(const std::vector<Player>& players,
     const std::vector<double>& contestedShotsAll) const {
     std::vector<double> ageGroupRawScores;
 
-    // ✅ Only collect raw hustle index values for players in the same age group
+    //Only collect raw hustle index values for players in the same age group
     for (const Player& player : players) {
         if ((age < 25 && player.getAge() < 25) ||
             (age >= 26 && age <= 32 && player.getAge() >= 26 && player.getAge() <= 32) ||
@@ -126,14 +132,14 @@ double Player::getAgeAdjustedNormalizedScore(const std::vector<Player>& players,
         }
     }
 
-    if (ageGroupRawScores.empty()) return 0.0;  // ✅ Prevent division errors
+    if (ageGroupRawScores.empty()) return 0.0;  //Prevent division errors
 
-    // ✅ Apply min-max normalization to the filtered age group scores
+    //Apply min-max normalization to the filtered age group scores
     std::vector<double> normalizedScores = normalizeScores(ageGroupRawScores);
 
     double rawScore = calculateHustleIndex(boxOutAll, screenAssistAll, deflectionsAll, looseBallsAll, chargesAll, contestedShotsAll);
     auto it = std::find(ageGroupRawScores.begin(), ageGroupRawScores.end(), rawScore);
     size_t index = std::distance(ageGroupRawScores.begin(), it);
 
-    return normalizedScores[index];  // ✅ Return the properly scaled score
+    return normalizedScores[index];  // Return the properly scaled score
 }
